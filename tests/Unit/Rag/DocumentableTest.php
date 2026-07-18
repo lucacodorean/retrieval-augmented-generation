@@ -7,7 +7,7 @@ namespace Tests\Unit\Rag;
 use App\Models\Vehicle;
 use App\Rag\Concerns\SyncsDocuments;
 use App\Rag\Contracts\Documentable;
-use App\Rag\Contracts\VehicleRagDocument;
+use App\Rag\Documents\VehicleDocument;
 use Tests\TestCase;
 
 class DocumentableTest extends TestCase
@@ -18,7 +18,7 @@ class DocumentableTest extends TestCase
 
         $this->assertInstanceOf(Documentable::class, $vehicle);
         $this->assertContains(SyncsDocuments::class, class_uses(Vehicle::class));
-        $this->assertSame(VehicleRagDocument::class, Vehicle::documentTransformer());
+        $this->assertSame(VehicleDocument::class, Vehicle::documentTransformer());
         $this->assertSame('vehicle-documents', Vehicle::ragCollection());
         $this->assertSame('vehicle:42', $vehicle->setAttribute('id', 42)->documentKey());
     }

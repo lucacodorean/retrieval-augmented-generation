@@ -13,8 +13,7 @@ class RagDocumentSynchronizer
     public function __construct(
         private EmbeddingsProviderInterface $embeddings,
         private QdrantDocumentStoreResolver $stores,
-    )
-    {
+    ) {
         //
     }
 

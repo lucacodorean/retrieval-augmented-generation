@@ -501,7 +501,7 @@ Expected: PASS with 3 tests.
 - [ ] **Step 5: Commit the transformer**
 
 ```bash
-git add app/Rag/Contracts/VehicleRagDocument.php tests/Unit/Rag/VehicleRagDocumentTest.php
+git add app/Rag/Contracts/VehicleDocument.php tests/Unit/Rag/VehicleRagDocumentTest.php
 git commit -m "feat: transform vehicles into rag documents"
 ```
 

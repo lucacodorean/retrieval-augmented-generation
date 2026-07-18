@@ -1,117 +1,159 @@
-# RAG in a PHP Backend
+# RAG Patterns For PHP Backends
 
-## What RAG Is
+## Purpose
 
-Retrieval-augmented generation, or RAG, gives an AI system relevant external context
-at request time. It retrieves likely useful information before a model produces an
-answer.
+Retrieval-augmented generation, or RAG, gives an AI system relevant domain context at
+request time. It retrieves likely useful records before an agent produces an answer.
 
-RAG does not replace a database. It makes information discoverable by meaning, even
-when a query does not use the exact words stored in a record.
+RAG does not replace relational data. It makes domain information discoverable by
+meaning while SQL remains responsible for validation, writes, relationships, and
+current state.
 
-## The Building Blocks
+## The RAG Lifecycle
 
-A RAG pipeline has five concepts:
+A reusable RAG backend has four stages: document construction, index synchronization,
+retrieval, and agent response.
 
-- **Source of truth**: the authoritative business data, normally relational records.
-- **Transformer**: converts a source record into a retrieval document.
-- **Embedding**: converts document content into a numeric semantic vector.
-- **Vector store**: persists vectors and finds nearby vectors for a query.
-- **Retriever**: embeds a query, searches the vector store, and returns useful data.
+```mermaid
+sequenceDiagram
+    participant Source as Source Database
+    participant Document as RAG Document Builder
+    participant Embedder as Embedding Model
+    participant Index as Vector Store
+    participant Tool as Retrieval Tool
+    participant Agent
+    participant Client
 
-```text
-Source record -> Transformer -> Document -> Embedding -> Vector store
+    Source->>Document: Domain record
+    Document->>Embedder: Readable document content
+    Embedder->>Index: Vector and metadata
+
+    Client->>Agent: Natural-language question
+    Agent->>Tool: Search when context is needed
+    Tool->>Embedder: Query text
+    Embedder->>Index: Query vector
+    Index-->>Tool: Ranked document metadata
+    Tool->>Source: Load current source records
+    Source-->>Tool: Authoritative records
+    Tool-->>Agent: Serialized results and scores
+    Agent-->>Client: Generated answer and serialized results
 ```
 
-At query time the direction is reversed:
+## Source Of Truth
 
-```text
-User query -> Query embedding -> Vector search -> Relevant source records
-```
+The vector store is an index, not an authority. It stores vectors, source keys, and
+metadata needed to find candidate records.
 
-## Source of Truth
+After retrieval, the backend reloads current records from SQL using returned metadata
+IDs. This prevents an agent from returning stale vector payload after a source record
+changes or is deleted.
 
-The vector store is an index, not the authority. A relational database remains the
-place where records are created, updated, validated, and deleted.
+## Documents And Metadata
 
-The vector store keeps enough document content and metadata to retrieve candidates.
-After retrieval, the backend should load the current source records by their IDs
-before returning an API response or giving context to an agent.
+A document builder translates one domain record into content and metadata.
 
-This avoids answering from stale vector metadata after a database record changes.
-
-## Transformers
-
-A transformer creates one RAG document from one domain record. It decides what the
-embedding model should understand and which values should remain structured metadata.
-
-In PHP with Neuron, a document is a `NeuronAI\RAG\Document`:
+Content is readable text for semantic matching. Metadata is scalar data for identity,
+routing, source-record reload, and potential future filtering.
 
 ```php
-$document = new Document(
-    'Vehicle AB-123-CD is a Nissan Leaf with 150 hp and electric fuel.',
-);
-
-$document->addMetadata('vehicle_id', 42);
+$document = new Document('A vehicle is electric and has 150 hp.');
+$document->addMetadata('source_id', 42);
 $document->addMetadata('fuel', 'electric');
+$document->addMetadata('hp', 150);
 ```
 
-`content` is readable text for semantic matching. Metadata is scalar data for
-identity and exact filtering, such as IDs, categories, or ownership boundaries.
+Do not add private information merely because it is available in the source model.
+Document content and metadata should contain only what retrieval requires.
 
-Do not include unnecessary sensitive data in document content. An embedding index is
-not a reason to duplicate names, emails, passwords, or private fields.
+## Synchronizing The Index
 
-## Embeddings
-
-An embedding model maps text to an array of numbers. Text with similar meaning tends
-
-For example, a query about an electric city car can retrieve a vehicle document that
-
-This project uses Ollama with `nomic-embed-text`. Its output dimension is `768`, so
-the matching Qdrant collection must also use dimension `768`.
-
-## Vector Stores
-
-Qdrant stores document vectors, content, and metadata. It performs similarity search
-without the application loading every vector into PHP.
-
-A collection groups vectors with compatible embedding dimensions and retrieval rules.
-Documentable model types can use separate collections, such as `vehicle-documents`
-
-Use stable document keys. This project uses keys such as `vehicle:42`; Qdrant maps
-them to deterministic UUID point IDs while retaining the source key as metadata.
-
-## Keeping the Index Current
-
-Database changes and vector changes are separate operations. The normal PHP pattern
-is an after-commit observer that queues synchronization work.
+Source writes and vector writes are separate operations. Use after-commit observers
+and queued jobs to synchronize vectors only after a source transaction succeeds.
 
 ```text
-Database transaction commits
-  -> observer dispatches a job
-  -> job transforms and embeds the record
-  -> job upserts or deletes its vector
+Source transaction commits
+  -> observer queues synchronization
+  -> job builds document and embedding
+  -> job upserts or deletes the vector
 ```
 
-The queue makes vector synchronization eventually consistent. A temporary Ollama or
-Qdrant failure can retry without rolling back the business transaction.
+This makes the vector index eventually consistent. Transient embedding or vector-store
+failures can retry without rolling back the source transaction.
 
-When a shared record contributes to many documents, its update must fan out. Updating
-shared vehicle details therefore queues an update for every related vehicle document.
+When a shared source record affects many documents, its change must fan out. A shared
+specification change may therefore queue updates for every dependent document.
 
-## Working With RAG in PHP
+## Semantic Search
 
-Use small boundaries:
+Semantic search is enough for a basic RAG agent. A query such as “quiet city car” can
+retrieve relevant records even when the stored text does not contain those words.
 
-- A model opts into RAG through `Documentable`.
-- A transformer creates its `Document`.
-- A synchronizer embeds and persists the document.
-- A queue job performs synchronization after commit.
-- A retrieval tool searches a selected collection and reloads current source records.
+Current vehicle retrieval uses semantic search only. Semantic search can retrieve
+relevant records from a query such as “quiet city car,” but it cannot guarantee every
+result satisfies an exact requirement.
 
-This separation keeps Eloquent models focused on domain data and keeps vector-store
-or embedding-provider choices out of business logic.
+Exact metadata filters are a future optional capability, not current behavior. They
+could later provide deterministic constraints such as `fuel = electric` or `hp >= 120`
+without changing embeddings when the required metadata is already present.
+
+## Tools And Agents
+
+The retrieval tool owns query embedding, vector search, source-record reload, and
+safe result mapping. An agent should receive the tool, not direct database or vector
+store access.
+
+The agent decides whether to search and explains the returned results. The application
+owns the response contract, so a frontend never needs to parse generated prose.
+
+```json
+{
+  "response": {
+    "natural-lang": "I found two matching records.",
+    "serialized": [
+      { "record": { "type": "example" }, "score": 0.91 }
+    ]
+  }
+}
+```
+
+`natural-lang` is generated by the agent. `serialized` comes from a resource mapper
+and is safe for machine consumers, including HTTP clients and frontends.
+
+## Vehicle Example
+
+This project applies the pattern to vehicles.
+
+```text
+Vehicle + VehicleDetails
+  -> VehicleRagDocument
+  -> Ollama embedding
+  -> Qdrant vehicle-documents collection
+  -> VehicleSearchTool
+  -> VehicleAgent
+```
+
+`VehicleSearchTool` supports a required semantic query and an optional result limit.
+Exact vehicle filters are a future optional capability.
+
+`VehicleAgent` uses local `qwen3:8b` for generation. Ollama `nomic-embed-text` is
+used separately for embeddings.
+
+## Add A New Entity
+
+To apply this pattern to a new entity such as `Fix`:
+
+1. Create the source model, migration, factory, and source-record tests.
+2. Create a document builder with readable content and scalar metadata.
+3. Opt the model into document synchronization and declare its vector collection.
+4. Add observers for the model and dependent shared records.
+5. Create a safe result resource for agent and frontend output.
+6. Create a model-specific semantic retrieval tool; add exact filters only when that
+   future capability is required.
+7. Create an agent with only that model's read-only retrieval tool.
+8. Test indexing, semantic retrieval, resource mapping, and agent output.
+
+Each entity can use an independent collection. Generic synchronization, retrieval,
+and resource infrastructure remain shared.
 
 ## Local Runtime
 
@@ -121,17 +163,13 @@ web container at `http://host.docker.internal:11434/api`.
 ```bash
 ddev start
 ddev php artisan queue:work
+ddev php artisan test
 ```
 
 Open Qdrant at `http://localhost:6333/dashboard`.
 
-## Tests
+## History And Decisions
 
-```bash
-ddev php artisan test
-```
-
-## History
-
-See `docs/history/2026-07-18-rag-foundation.md` for the session summary. Design and
-implementation decisions are recorded in `docs/superpowers/` and `docs/adr/`.
+See `docs/history/2026-07-18-rag-foundation.md` for the original session summary.
+Architecture decisions are recorded under `docs/adr/` and detailed designs under
+`docs/superpowers/`.

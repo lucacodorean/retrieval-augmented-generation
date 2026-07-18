@@ -2,15 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Rag\Contracts;
+namespace App\Rag\Documents;
 
 use App\Models\Vehicle;
 use App\Models\VehicleDetails;
+use App\Rag\Contracts\DocumentTransformer;
 use Illuminate\Database\Eloquent\Model;
 use LogicException;
 use NeuronAI\RAG\Document;
 
-class VehicleRagDocument implements DocumentTransformer
+class VehicleDocument implements DocumentTransformer
 {
     public static function build(Model $model): Document
     {

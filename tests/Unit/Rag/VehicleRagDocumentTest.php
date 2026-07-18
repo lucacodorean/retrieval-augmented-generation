@@ -8,7 +8,7 @@ use App\Enum\Fuel;
 use App\Enum\VehicleBrand;
 use App\Models\Vehicle;
 use App\Models\VehicleDetails;
-use App\Rag\Contracts\VehicleRagDocument;
+use App\Rag\Documents\VehicleDocument;
 use LogicException;
 use Tests\TestCase;
 
@@ -35,7 +35,7 @@ class VehicleRagDocumentTest extends TestCase
         ]);
         $vehicle->setRelation('vehicleDetails', $details);
 
-        $document = VehicleRagDocument::build($vehicle);
+        $document = VehicleDocument::build($vehicle);
 
         $this->assertSame('vehicle:42', $document->getId());
         $this->assertSame(Vehicle::class, $document->sourceType);
@@ -63,7 +63,7 @@ class VehicleRagDocumentTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Vehicle details relationship must be loaded.');
 
-        VehicleRagDocument::build($vehicle);
+        VehicleDocument::build($vehicle);
     }
 
     public function test_it_omits_owner_metadata(): void
@@ -86,7 +86,7 @@ class VehicleRagDocumentTest extends TestCase
         ]);
         $vehicle->setRelation('vehicleDetails', $details);
 
-        $document = VehicleRagDocument::build($vehicle);
+        $document = VehicleDocument::build($vehicle);
 
         $this->assertStringNotContainsString('owned by', $document->getContent());
     }
@@ -99,6 +99,6 @@ class VehicleRagDocumentTest extends TestCase
         $this->expectException(LogicException::class);
         $this->expectExceptionMessage('Vehicle details relationship must be loaded.');
 
-        VehicleRagDocument::build($vehicle);
+        VehicleDocument::build($vehicle);
     }
 }

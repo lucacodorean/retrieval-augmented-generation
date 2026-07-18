@@ -149,7 +149,7 @@ public function documentKey(): string
 }
 ```
 
-Keep the static transformer API and reduce it to `DocumentTransformer::build(Model $model): Document`; delete `asJson()`. Update tests to call `VehicleRagDocument::build($vehicle)`. `VehicleRagDocument` must reject an unloaded or null `vehicleDetails` relation with `LogicException('Vehicle details relationship must be loaded.')`; it must not call `load()` itself. Build the existing vehicle prose without owner name/email, set `id` and `sourceName` to `$vehicle->documentKey()`, set `sourceType` to `Vehicle::class`, and retain only scalar metadata.
+Keep the static transformer API and reduce it to `DocumentTransformer::build(Model $model): Document`; delete `asJson()`. Update tests to call `VehicleRagDocument::build($vehicle)`. `VehicleDocument` must reject an unloaded or null `vehicleDetails` relation with `LogicException('Vehicle details relationship must be loaded.')`; it must not call `load()` itself. Build the existing vehicle prose without owner name/email, set `id` and `sourceName` to `$vehicle->documentKey()`, set `sourceType` to `Vehicle::class`, and retain only scalar metadata.
 
 - [ ] **Step 4: Run the focused tests to verify they pass**
 

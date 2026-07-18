@@ -4,24 +4,27 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Neuron\Resources\VehicleResource;
 use App\Rag\Concerns\SyncsDocuments;
 use App\Rag\Contracts\Documentable;
-use App\Rag\Contracts\VehicleRagDocument;
+use App\Rag\Contracts\RagSearchable;
+use App\Rag\Documents\VehicleDocument;
 use Database\Factories\VehicleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['index', 'vin', 'user_id', 'vehicle_details_id'])]
-class Vehicle extends Model implements Documentable
+class Vehicle extends Model implements Documentable, RagSearchable
 {
     /** @use HasFactory<VehicleFactory> */
     use HasFactory, SyncsDocuments;
 
     public static function documentTransformer(): string
     {
-        return VehicleRagDocument::class;
+        return VehicleDocument::class;
     }
 
     public static function documentRelations(): array
@@ -37,6 +40,20 @@ class Vehicle extends Model implements Documentable
     public static function ragCollection(): string
     {
         return 'vehicle-documents';
+    }
+
+    public static function loadRagRecords(array $ids): Collection
+    {
+        return static::query()
+            ->with('vehicleDetails')
+            ->whereKey($ids)
+            ->get()
+            ->keyBy(fn (Vehicle $vehicle): int => $vehicle->getKey());
+    }
+
+    public static function ragResultResource(): string
+    {
+        return VehicleResource::class;
     }
 
     public function owner(): BelongsTo
