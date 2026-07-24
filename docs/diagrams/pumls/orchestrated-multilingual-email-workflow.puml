@@ -1,0 +1,32 @@
+@startuml
+title Orchestrated Multilingual Email Workflow
+
+left to right direction
+skinparam componentStyle rectangle
+
+rectangle "Query and recipients" as Input
+rectangle "Response agent" as ResponseAgent
+rectangle "Coordinator" as Coordinator
+rectangle "Translator agent (language A)" as TranslatorA
+rectangle "Translator agent (language B)" as TranslatorB
+rectangle "Translator agent (language N)" as TranslatorN
+rectangle "Email agent" as EmailAgent
+rectangle "Issued emails" as Output
+
+Input --> ResponseAgent
+ResponseAgent --> Coordinator : source response
+
+Coordinator --> TranslatorA : source response
+Coordinator --> TranslatorB : source response
+Coordinator --> TranslatorN : source response
+
+TranslatorA --> EmailAgent : translation A
+TranslatorB --> EmailAgent : translation B
+TranslatorN --> EmailAgent : translation N
+Coordinator --> EmailAgent : recipient envelopes
+EmailAgent --> Output
+
+note bottom of TranslatorB
+  Translation branches run in parallel.
+end note
+@enduml

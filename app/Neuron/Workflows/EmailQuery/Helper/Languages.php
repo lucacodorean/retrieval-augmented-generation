@@ -2,7 +2,8 @@
 
 namespace App\Neuron\Workflows\EmailQuery\Helper;
 
-enum Languages
+enum Languages: string
 {
-
+    case ROMANIAN = 'ro';
+    case FRENCH = 'fr';
 }

@@ -13,11 +13,11 @@ use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use NeuronAI\Workflow\Node;
 use NeuronAI\Workflow\WorkflowState;
 
-class DelegatorNode extends Node
+class CollectorNode extends Node
 {
-    public function __invoke(QueryObtainedEvent $event, WorkflowState $state): TranslatingRequestsIssuedEvent
+    public function __invoke(TranslatingRequestsIssuedEvent $event, WorkflowState $state): TranslatingRequestsIssuedEvent
     {
-        $state->set(NodeInterface::CURRENT_STEP, NodeState::DELEGATING);
+        $state->set(NodeInterface::CURRENT_STEP, NodeState::COLLECTING_TRANSLATIONS);
 
         return new TranslatingRequestsIssuedEvent([
             Languages::ROMANIAN->value => RomanianTranslationDoneEvent::class,

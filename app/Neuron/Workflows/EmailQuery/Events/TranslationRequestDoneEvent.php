@@ -7,15 +7,18 @@ namespace App\Neuron\Workflows\EmailQuery\Events;
 use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use NeuronAI\Workflow\Events\Event;
 use NeuronAI\Workflow\Events\ParallelEvent;
+use NeuronAI\Workflow\Events\StopEvent;
 
-class TranslatingRequestsIssuedEvent extends ParallelEvent implements Event, EventInterface
+class TranslationRequestDoneEvent extends StopEvent implements EventInterface
 {
-    public function __construct(public readonly array $branches) {
-        parent::__construct($branches);
+    public function __construct(
+        public readonly string $locale,
+    ) {
+        parent::__construct($locale);
     }
 
     public function getResultingState(): NodeState
     {
-        return NodeState::QUERY_RESPONSE_TRANSLATIONS_REQUESTED;
+        return NodeState::QUERY_RESPONSE_TRANSLATED;
     }
 }

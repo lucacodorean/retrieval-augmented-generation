@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace App\Neuron\Workflows\EmailQuery\Nodes;
 
-use NeuronAI\Workflow\Events\StartEvent;
-use NeuronAI\Workflow\Events\StopEvent;
+use App\Neuron\Workflows\EmailQuery\Events\FrenchTranslationDoneEvent;
+use App\Neuron\Workflows\EmailQuery\Events\QueryObtainedEvent;
+use App\Neuron\Workflows\EmailQuery\Events\RomanianTranslationDoneEvent;
+use App\Neuron\Workflows\EmailQuery\Events\TranslatingRequestsIssuedEvent;
+use App\Neuron\Workflows\EmailQuery\Helper\Languages;
+use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use NeuronAI\Workflow\Node;
 use NeuronAI\Workflow\WorkflowState;
 
-class FirstStep extends Node
+class DelegatorNode extends Node
 {
-    public function __invoke(StartEvent $event, WorkflowState $state): StopEvent
+    public function __invoke(QueryObtainedEvent $event, WorkflowState $state): TranslatingRequestsIssuedEvent
     {
-        // ...
+        $state->set(NodeInterface::CURRENT_STEP, NodeState::DELEGATING);
 
-        return new StopEvent();
+        return new TranslatingRequestsIssuedEvent([
+            Languages::ROMANIAN->value => RomanianTranslationDoneEvent::class,
+            Languages::FRENCH->value   => FrenchTranslationDoneEvent::class,
+        ]);
     }
 }

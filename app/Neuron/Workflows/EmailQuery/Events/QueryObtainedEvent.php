@@ -7,10 +7,10 @@ namespace App\Neuron\Workflows\EmailQuery\Events;
 use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use NeuronAI\Workflow\Events\Event;
 
-class FrenchTranslationDoneEvent implements Event, EventInterface
+class QueryObtainedEvent implements Event, EventInterface
 {
     public function getResultingState(): NodeState
     {
-        return NodeState::QUERY_RESPONSE_TRANSLATED;
+        return NodeState::QUERY_OBTAINED;
     }
 }

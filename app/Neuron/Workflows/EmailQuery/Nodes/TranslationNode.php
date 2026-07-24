@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Neuron\Workflows\EmailQuery\Nodes;
 
-class TranslationNode
+interface TranslationNode
 {
-
+    public function getTranslationLanguage(): string;
 }
