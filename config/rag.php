@@ -6,6 +6,7 @@ return [
     'ollama' => [
         'url' => env('RAG_OLLAMA_URL', 'http://host.docker.internal:11434/api'),
         'model' => env('RAG_OLLAMA_MODEL', 'nomic-embed-text'),
+        'timeout' => (float) env('RAG_OLLAMA_TIMEOUT', 180),
     ],
     'qdrant' => [
         'base_url' => env('RAG_QDRANT_BASE_URL', 'http://qdrant:6333'),

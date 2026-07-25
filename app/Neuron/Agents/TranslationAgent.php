@@ -33,7 +33,7 @@ abstract class TranslationAgent extends Agent
         return new Ollama(
             config('rag.ollama.url'),
             'qwen3:8b',
-            httpClient: new AmpHttpClient,
+            httpClient: new AmpHttpClient(timeout: config('rag.ollama.timeout')),
         );
     }
 

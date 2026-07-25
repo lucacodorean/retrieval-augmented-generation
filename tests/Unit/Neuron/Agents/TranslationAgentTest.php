@@ -14,6 +14,7 @@ use NeuronAI\Testing\FakeAIProvider;
 use NeuronAI\Testing\RequestRecord;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
+use ReflectionProperty;
 use Tests\TestCase;
 use UnexpectedValueException;
 
@@ -100,6 +101,9 @@ class TranslationAgentTest extends TestCase
 
         $this->assertInstanceOf(Ollama::class, $provider);
         $this->assertInstanceOf(AmpHttpClient::class, $provider->getHttpClient());
+
+        $timeout = new ReflectionProperty(AmpHttpClient::class, 'timeout');
+        $this->assertSame(180.0, $timeout->getValue($provider->getHttpClient()));
     }
 
     /** @return array<string, array{class-string, string, string}> */
