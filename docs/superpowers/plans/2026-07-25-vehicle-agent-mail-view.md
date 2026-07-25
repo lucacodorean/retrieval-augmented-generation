@@ -4,7 +4,7 @@
 
 **Goal:** Render the vehicle-agent message and safe serialized vehicle details with Laravel's Markdown mail renderer.
 
-**Architecture:** `VehicleAgentMail` receives the natural-language text and serialized result list and configures a Laravel Markdown Blade view. The view uses Laravel mail components, escapes dynamic values, and conditionally renders the table only when results exist.
+**Architecture:** `VehicleAgentMail` receives the natural-language text, language-specific subject prefix, and serialized result list, then configures a Laravel Markdown Blade view. The view uses Laravel mail components, escapes dynamic values, and conditionally renders the table only when results exist.
 
 **Tech Stack:** PHP 8.3, Laravel 13 Mailables and Blade, PHPUnit 12, Laravel Pint
 
@@ -66,6 +66,7 @@ Add strict types and a constructor with immutable public values. Use `agentText`
 /** @param list<array{record: array<string, mixed>, score: float}> $vehicles */
 public function __construct(
     public readonly string $agentText,
+    public readonly string $language,
     public readonly array $vehicles,
 ) {}
 ```

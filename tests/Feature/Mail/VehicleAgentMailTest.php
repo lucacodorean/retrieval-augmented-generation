@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Tests\Feature\Mail;
 
 use App\Mail\VehicleAgentMail;
+use DOMDocument;
+use DOMNode;
+use DOMXPath;
 use Tests\TestCase;
 
 class VehicleAgentMailTest extends TestCase
@@ -12,7 +15,7 @@ class VehicleAgentMailTest extends TestCase
     public function test_it_renders_an_escaped_multiline_message_and_vehicle_details(): void
     {
         $mail = new VehicleAgentMail(
-            agentText: "First line\n<script>alert('x')</script>",
+            agentText: "First line\n<script>alert('x')</script>\n[Review results](https://attacker.example)",
             language: 'French',
             vehicles: [[
                 'record' => [
@@ -45,6 +48,9 @@ class VehicleAgentMailTest extends TestCase
         $this->assertStringContainsString('&lt;/script&gt;', $html);
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertMatchesRegularExpression('/First line<br\s*\/?>\s*&lt;script&gt;/', $html);
+        $this->assertStringContainsString('[Review results](https://attacker.example)', $html);
+        $this->assertStringNotContainsString('href="https://attacker.example"', $html);
+        $this->assertDoesNotMatchRegularExpression('/<a[^>]*>\s*Review results\s*<\/a>/', $html);
         $this->assertMatchesRegularExpression('/<h2[^>]*>\s*Vehicle details\s*<\/h2>/', $html);
 
         $this->assertMatchesRegularExpression(
@@ -90,5 +96,59 @@ class VehicleAgentMailTest extends TestCase
             '/<div[^>]*class="[^"]*\btable\b[^"]*"[^>]*>\s*<table\b/',
             $html,
         );
+    }
+
+    public function test_it_renders_table_metacharacters_as_literal_cell_content(): void
+    {
+        $html = (new VehicleAgentMail(
+            agentText: 'Matching vehicle.',
+            language: 'French',
+            vehicles: [[
+                'record' => [
+                    'type' => 'vehicle',
+                    'id' => 1,
+                    'attributes' => [
+                        'index' => 'DU-181-FQ A&B',
+                        'vin' => 'VIN/2026.07_ABC-123 "double" \'single\'',
+                    ],
+                    'relationships' => [
+                        'vehicle_details' => [
+                            'id' => 2,
+                            'brand' => '[Review](https://attacker.example)',
+                            'model' => '![image](https://attacker.example/pixel.png) <tag>',
+                            'hp' => 175,
+                            'fuel' => "*electric* and `code` | hybrid\\plug\r\nnext",
+                        ],
+                    ],
+                ],
+                'score' => 0.5,
+            ]],
+        ))->render();
+
+        $document = new DOMDocument;
+        $document->loadHTML($html);
+        $xpath = new DOMXPath($document);
+        $rows = $xpath->query('//div[contains(concat(" ", normalize-space(@class), " "), " table ")]//tbody/tr[td]');
+
+        $this->assertCount(1, $rows);
+
+        $cells = $xpath->query('./td', $rows->item(0));
+
+        $this->assertCount(6, $cells);
+        $this->assertSame(
+            [
+                'DU-181-FQ A&B',
+                'VIN/2026.07_ABC-123 "double" \'single\'',
+                '[Review](https://attacker.example)',
+                '![image](https://attacker.example/pixel.png) <tag>',
+                '175',
+                '*electric* and `code` | hybrid\plug next',
+            ],
+            array_map(static fn (DOMNode $cell): string => trim($cell->textContent), iterator_to_array($cells)),
+        );
+        $this->assertStringNotContainsString('href="https://attacker.example"', $html);
+        $this->assertStringNotContainsString('src="https://attacker.example/pixel.png"', $html);
+        $this->assertCount(0, $xpath->query('.//a | .//img | .//em | .//strong | .//code', $rows->item(0)));
+        $this->assertCount(0, $xpath->query('./td//*', $rows->item(0)));
     }
 }

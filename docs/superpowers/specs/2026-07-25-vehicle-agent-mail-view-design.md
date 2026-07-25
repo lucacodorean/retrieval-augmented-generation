@@ -10,6 +10,7 @@ available, a table of serialized vehicle results.
 `VehicleAgentMail` receives:
 
 - a message string;
+- a language name used to prefix the email subject;
 - the `response.serialized` vehicle-result list returned by `VehicleAgent`.
 
 Each list item contains `record` and `score`. The email ignores `score` and uses only
@@ -49,7 +50,8 @@ presentation only and does not query models or transform domain records.
 
 Rendering tests verify that:
 
-1. the message is present and HTML is escaped;
-2. all six columns and their values render in the required order for a populated result;
-3. details ID, similarity score, and outer vehicle record ID are absent;
-4. the table and results heading are absent for an empty list.
+1. the language prefixes the email subject;
+2. the message is present and HTML is escaped;
+3. all six columns and their values render in the required order for a populated result;
+4. details ID, similarity score, and outer vehicle record ID are absent;
+5. the table and results heading are absent for an empty list.
