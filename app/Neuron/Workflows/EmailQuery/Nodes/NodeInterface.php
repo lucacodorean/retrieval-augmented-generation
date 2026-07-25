@@ -6,6 +6,5 @@ namespace App\Neuron\Workflows\EmailQuery\Nodes;
 
 interface NodeInterface
 {
-    public const string CURRENT_STEP = "current_step";
-
+    public const string CURRENT_STEP = 'current_step';
 }

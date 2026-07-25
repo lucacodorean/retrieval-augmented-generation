@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "amphp/amp": "^3.1",
+        "amphp/http-client": "^5.3",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
         "neuron-core/neuron-ai": "^3.15"

@@ -6,5 +6,4 @@ namespace App\Neuron\Workflows\EmailQuery\Events;
 
 use NeuronAI\Workflow\Events\Event;
 
-interface TranslatingRequestsIssuedEventInterface extends Event, EventInterface {
-}
+interface TranslatingRequestsIssuedEventInterface extends Event, EventInterface {}

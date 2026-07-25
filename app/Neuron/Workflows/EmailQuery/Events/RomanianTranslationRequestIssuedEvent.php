@@ -10,6 +10,6 @@ class RomanianTranslationRequestIssuedEvent implements TranslatingRequestsIssued
 {
     public function getResultingState(): NodeState
     {
-        return NodeState::QUERY_RESPONSE_TRANSLATED;
+        return NodeState::QUERY_RESPONSE_TRANSLATIONS_REQUESTED;
     }
 }
