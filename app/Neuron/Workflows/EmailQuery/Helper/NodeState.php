@@ -15,5 +15,7 @@ enum NodeState: string
     case COLLECTING_TRANSLATIONS = 'collecting_translations';
 
     case COLLECTED_TRANSLATIONS = 'collected_translations';
-    case TRANSLATIONS_PUSHED = 'translations_pushed';
+
+    case SENDING_EMAIL = 'sending_email';
+    case EMAILS_PUSHED = 'emails_pushed';
 }

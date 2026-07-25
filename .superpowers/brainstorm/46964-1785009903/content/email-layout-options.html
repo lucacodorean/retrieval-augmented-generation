@@ -1,0 +1,89 @@
+<style>
+  .email-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
+  .email-card { cursor:pointer; border:2px solid #dbe1e8; border-radius:14px; overflow:hidden; background:#fff; transition:.15s ease; }
+  .email-card:hover { border-color:#68778a; transform:translateY(-2px); }
+  .email-card.selected { border-color:#1e5f52; box-shadow:0 0 0 3px rgba(30,95,82,.15); }
+  .choice-label { padding:12px 14px; background:#f2f5f7; font-weight:700; color:#25313c; }
+  .email-preview { margin:14px; border:1px solid #d9dee5; background:#f6f3ec; padding:14px; min-height:430px; font-family:Arial,sans-serif; color:#27313b; }
+  .mail-shell { background:#fff; padding:18px; }
+  .eyebrow { font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:#68778a; margin-bottom:8px; }
+  .mail-title { font-family:Georgia,serif; font-size:20px; margin:0 0 12px; color:#183b35; }
+  .mail-copy { font-size:11px; line-height:1.55; margin:0 0 17px; color:#3d4853; }
+  .vehicle-table { width:100%; border-collapse:collapse; font-size:8px; }
+  .vehicle-table th { text-align:left; padding:7px 5px; background:#183b35; color:#fff; text-transform:uppercase; letter-spacing:.3px; }
+  .vehicle-table td { padding:7px 5px; border-bottom:1px solid #dde3e0; white-space:nowrap; }
+  .vehicle-table tr:nth-child(even) td { background:#f4f7f5; }
+  .utility .email-preview { background:#eef2f6; }
+  .utility .mail-shell { border-top:5px solid #315a85; }
+  .utility .mail-title { font-family:Arial,sans-serif; color:#233c57; font-size:18px; }
+  .utility .vehicle-table th { background:#315a85; }
+  .utility .vehicle-table td { border:1px solid #d6dee7; }
+  .minimal .email-preview { background:#fff; border-color:#c9c9c9; }
+  .minimal .mail-shell { padding:8px; }
+  .minimal .mail-title { font-family:Arial,sans-serif; color:#111; font-size:16px; }
+  .minimal .vehicle-table th { background:#eee; color:#111; border-bottom:2px solid #333; }
+  .minimal .vehicle-table td { border-bottom:1px solid #bbb; }
+  .option-note { padding:0 14px 15px; color:#617080; font-size:12px; line-height:1.4; }
+  @media (max-width:900px) { .email-options { grid-template-columns:1fr; } }
+</style>
+
+<h2>Choose the vehicle-results email layout</h2>
+<p class="subtitle">All options show the message first and omit the table entirely when there are no serialized vehicles.</p>
+
+<div class="email-options">
+  <div class="email-card" data-choice="editorial" onclick="toggleSelect(this)">
+    <div class="choice-label">A. Editorial Report</div>
+    <div class="email-preview">
+      <div class="mail-shell">
+        <div class="eyebrow">Vehicle Agent / Search Result</div>
+        <h3 class="mail-title">Your vehicle recommendations</h3>
+        <p class="mail-copy">The Suzuki Quos electric models are the quietest options for city driving. Two matching vehicle records are shown below.</p>
+        <table class="vehicle-table">
+          <thead><tr><th>ID</th><th>Brand</th><th>Model</th><th>HP</th><th>Fuel</th><th>VIN</th><th>Index</th></tr></thead>
+          <tbody>
+            <tr><td>10</td><td>Suzuki</td><td>quos</td><td>175</td><td>electric</td><td>ERHG...U4WD</td><td>DU-181-FQ</td></tr>
+            <tr><td>9</td><td>Suzuki</td><td>quos</td><td>175</td><td>electric</td><td>8G6A...ZSNK</td><td>MA-304-UI</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="option-note">Warm, polished, and readable. Strong hierarchy without looking like an admin notification.</div>
+  </div>
+
+  <div class="email-card utility" data-choice="utility" onclick="toggleSelect(this)">
+    <div class="choice-label">B. Utility Digest</div>
+    <div class="email-preview">
+      <div class="mail-shell">
+        <div class="eyebrow">Vehicle search completed</div>
+        <h3 class="mail-title">Matching vehicles</h3>
+        <p class="mail-copy">The Suzuki Quos electric models are the quietest options for city driving. Two matching vehicle records are shown below.</p>
+        <table class="vehicle-table">
+          <thead><tr><th>ID</th><th>Brand</th><th>Model</th><th>HP</th><th>Fuel</th><th>VIN</th><th>Index</th></tr></thead>
+          <tbody>
+            <tr><td>10</td><td>Suzuki</td><td>quos</td><td>175</td><td>electric</td><td>ERHG...U4WD</td><td>DU-181-FQ</td></tr>
+            <tr><td>9</td><td>Suzuki</td><td>quos</td><td>175</td><td>electric</td><td>8G6A...ZSNK</td><td>MA-304-UI</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="option-note">Structured and operational. Best if the email is primarily a data-delivery artifact.</div>
+  </div>
+
+  <div class="email-card minimal" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="choice-label">C. Minimal Compatible</div>
+    <div class="email-preview">
+      <div class="mail-shell">
+        <h3 class="mail-title">Vehicle recommendations</h3>
+        <p class="mail-copy">The Suzuki Quos electric models are the quietest options for city driving. Two matching vehicle records are shown below.</p>
+        <table class="vehicle-table">
+          <thead><tr><th>ID</th><th>Brand</th><th>Model</th><th>HP</th><th>Fuel</th><th>VIN</th><th>Index</th></tr></thead>
+          <tbody>
+            <tr><td>10</td><td>Suzuki</td><td>quos</td><td>175</td><td>electric</td><td>ERHG...U4WD</td><td>DU-181-FQ</td></tr>
+            <tr><td>9</td><td>Suzuki</td><td>quos</td><td>175</td><td>electric</td><td>8G6A...ZSNK</td><td>MA-304-UI</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="option-note">Lowest visual complexity and broadest email-client compatibility.</div>
+  </div>
+</div>

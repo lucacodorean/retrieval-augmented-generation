@@ -6,6 +6,7 @@ namespace App\Neuron\Workflows\EmailQuery\Nodes;
 
 use App\Neuron\Workflows\EmailQuery\Data\Translation;
 use App\Neuron\Workflows\EmailQuery\EmailQueryWorkflowState;
+use App\Neuron\Workflows\EmailQuery\Events\EmailSendRequestEvent;
 use App\Neuron\Workflows\EmailQuery\Helper\Language;
 use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use LogicException;
@@ -15,7 +16,7 @@ use NeuronAI\Workflow\Node;
 
 class CollectorNode extends Node
 {
-    public function __invoke(ParallelEvent $event, EmailQueryWorkflowState $state): StopEvent
+    public function __invoke(ParallelEvent $event, EmailQueryWorkflowState $state): EmailSendRequestEvent
     {
         $state->setCurrentStep(NodeState::COLLECTING_TRANSLATIONS);
         $state->setTranslations([]);
@@ -43,6 +44,6 @@ class CollectorNode extends Node
         $state->setTranslations($translations);
         $state->setCurrentStep(NodeState::COLLECTED_TRANSLATIONS);
 
-        return new StopEvent;
+        return new EmailSendRequestEvent;
     }
 }

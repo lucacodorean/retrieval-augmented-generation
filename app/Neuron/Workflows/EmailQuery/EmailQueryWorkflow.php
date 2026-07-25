@@ -9,6 +9,7 @@ use App\Neuron\Agents\RomanianTranslationAgent;
 use App\Neuron\Agents\VehicleAgent;
 use App\Neuron\Workflows\EmailQuery\Nodes\CollectorNode;
 use App\Neuron\Workflows\EmailQuery\Nodes\DelegatorNode;
+use App\Neuron\Workflows\EmailQuery\Nodes\EmailSenderNode;
 use App\Neuron\Workflows\EmailQuery\Nodes\FrenchTranslationNode;
 use App\Neuron\Workflows\EmailQuery\Nodes\RomanianTranslationNode;
 use App\Neuron\Workflows\EmailQuery\Nodes\RunQueryNode;
@@ -50,6 +51,7 @@ class EmailQueryWorkflow extends Workflow
             new FrenchTranslationNode($this->frenchAgent),
 
             new CollectorNode,
+            new EmailSenderNode,
         ];
     }
 }

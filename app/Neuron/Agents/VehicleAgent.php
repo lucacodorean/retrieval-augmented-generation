@@ -9,6 +9,7 @@ use NeuronAI\Agent\Agent;
 use NeuronAI\Agent\SystemPrompt;
 use NeuronAI\Chat\Messages\ToolResultMessage;
 use NeuronAI\Chat\Messages\UserMessage;
+use NeuronAI\HttpClient\AmpHttpClient;
 use NeuronAI\Providers\AIProviderInterface;
 use NeuronAI\Providers\Ollama\Ollama;
 use NeuronAI\Tools\ToolInterface;
@@ -62,7 +63,11 @@ class VehicleAgent extends Agent
 
     protected function provider(): AIProviderInterface
     {
-        return new Ollama(config('rag.ollama.url'), 'qwen3:8b');
+        return new Ollama(
+            config('rag.ollama.url'),
+            'qwen3:8b',
+            httpClient: new AmpHttpClient(timeout: config('rag.ollama.timeout')),
+        );
     }
 
     protected function instructions(): string

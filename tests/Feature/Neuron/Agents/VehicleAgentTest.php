@@ -12,8 +12,12 @@ use App\Rag\RagRetriever;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use NeuronAI\Chat\Messages\AssistantMessage;
 use NeuronAI\Chat\Messages\ToolCallMessage;
+use NeuronAI\HttpClient\AmpHttpClient;
+use NeuronAI\Providers\Ollama\Ollama;
 use NeuronAI\RAG\Document;
 use NeuronAI\Testing\FakeAIProvider;
+use ReflectionMethod;
+use ReflectionProperty;
 use Tests\TestCase;
 
 class VehicleAgentTest extends TestCase
@@ -66,6 +70,20 @@ class VehicleAgentTest extends TestCase
             ],
         ], $response);
         $provider->assertCallCount(1);
+    }
+
+    public function test_the_production_provider_uses_the_configured_ollama_timeout(): void
+    {
+        $providerMethod = new ReflectionMethod(VehicleAgent::class, 'provider');
+        $provider = $providerMethod->invoke(new VehicleAgent(
+            new VehicleSearchTool(new VehicleAgentFakeRetriever([])),
+        ));
+
+        $this->assertInstanceOf(Ollama::class, $provider);
+        $this->assertInstanceOf(AmpHttpClient::class, $provider->getHttpClient());
+
+        $timeout = new ReflectionProperty(AmpHttpClient::class, 'timeout');
+        $this->assertSame(180.0, $timeout->getValue($provider->getHttpClient()));
     }
 
     private function document(int $vehicleId, float $score): Document
