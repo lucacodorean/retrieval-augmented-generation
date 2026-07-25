@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Neuron\Workflows\EmailQuery\Events;
 
+use App\Neuron\Workflows\EmailQuery\Helper\Language;
 use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
-use NeuronAI\Workflow\Events\Event;
 
-class RomanianTranslationDoneEvent implements Event, EventInterface
+class RomanianTranslationDoneEvent extends TranslationRequestDoneEvent
 {
+    public function __construct()
+    {
+        parent::__construct(Language::ROMANIAN);
+    }
+
     public function getResultingState(): NodeState
     {
         return NodeState::QUERY_RESPONSE_TRANSLATED;

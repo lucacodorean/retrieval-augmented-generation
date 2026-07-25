@@ -7,7 +7,7 @@ namespace App\Neuron\Workflows\EmailQuery\Events;
 use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use NeuronAI\Workflow\Events\ParallelEvent;
 
-class RomanianTranslationRequestIssuedEvent extends ParallelEvent implements TranslatingRequestsIssuedEventInterface
+class FrenchTranslationRequestIssuedEvent implements TranslatingRequestsIssuedEventInterface
 {
     public function getResultingState(): NodeState
     {

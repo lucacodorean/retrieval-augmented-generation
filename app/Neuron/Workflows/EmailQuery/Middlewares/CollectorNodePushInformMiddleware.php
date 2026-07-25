@@ -39,7 +39,7 @@ class CollectorNodePushInformMiddleware implements WorkflowMiddleware
      * @param WorkflowState $state The current workflow state
      */
     public function after(NodeInterface $node, Event $result, WorkflowState $state): void {
-        $state->set(QueryEmailNodeInterface::CURRENT_STEP, NodeState::TRANSLATIONS_PUSHED);
+        $state->set(QueryEmailNodeInterface::CURRENT_STEP, NodeState::COLLECTED_TRANSLATIONS);
         logger("Translated results were pushed.");
 
     }
