@@ -26,6 +26,8 @@ class EmailSenderNode extends Node
             ));
         }
 
+        $state->setCurrentStep(NodeState::EMAILS_PUSHED);
+
         return new StopEvent;
     }
 }

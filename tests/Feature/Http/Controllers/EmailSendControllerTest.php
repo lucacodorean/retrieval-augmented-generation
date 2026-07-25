@@ -22,8 +22,46 @@ class EmailSendControllerTest extends TestCase
             'response' => [
                 'natural-lang' => 'Two electric vehicles are available.',
                 'serialized' => [
-                    ['record' => ['type' => 'vehicle', 'id' => 42], 'score' => 0.91],
-                    ['record' => ['type' => 'vehicle', 'id' => 84], 'score' => 0.87],
+                    [
+                        'record' => [
+                            'type' => 'vehicle',
+                            'id' => 42,
+                            'attributes' => [
+                                'index' => 'EV-0042',
+                                'vin' => '1N4AZ1CP0KC300042',
+                            ],
+                            'relationships' => [
+                                'vehicle_details' => [
+                                    'id' => 142,
+                                    'brand' => 'Nissan',
+                                    'model' => 'Leaf',
+                                    'hp' => 147,
+                                    'fuel' => 'electric',
+                                ],
+                            ],
+                        ],
+                        'score' => 0.91,
+                    ],
+                    [
+                        'record' => [
+                            'type' => 'vehicle',
+                            'id' => 84,
+                            'attributes' => [
+                                'index' => 'EV-0084',
+                                'vin' => '5YJ3E1EA7KF300084',
+                            ],
+                            'relationships' => [
+                                'vehicle_details' => [
+                                    'id' => 184,
+                                    'brand' => 'Tesla',
+                                    'model' => 'Model 3',
+                                    'hp' => 283,
+                                    'fuel' => 'electric',
+                                ],
+                            ],
+                        ],
+                        'score' => 0.87,
+                    ],
                 ],
             ],
         ];

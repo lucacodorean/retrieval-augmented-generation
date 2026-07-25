@@ -6,12 +6,12 @@ namespace Tests\Unit\Neuron\Workflows\EmailQuery\Nodes;
 
 use App\Neuron\Workflows\EmailQuery\Data\Translation;
 use App\Neuron\Workflows\EmailQuery\EmailQueryWorkflowState;
+use App\Neuron\Workflows\EmailQuery\Events\EmailSendRequestEvent;
 use App\Neuron\Workflows\EmailQuery\Helper\Language;
 use App\Neuron\Workflows\EmailQuery\Helper\NodeState;
 use App\Neuron\Workflows\EmailQuery\Nodes\CollectorNode;
 use LogicException;
 use NeuronAI\Workflow\Events\ParallelEvent;
-use NeuronAI\Workflow\Events\StopEvent;
 use Tests\TestCase;
 
 class CollectorNodeTest extends TestCase
@@ -29,8 +29,7 @@ class CollectorNodeTest extends TestCase
 
         $event = (new CollectorNode)($parallelEvent, $state);
 
-        $this->assertInstanceOf(StopEvent::class, $event);
-        $this->assertNull($event->getResult());
+        $this->assertInstanceOf(EmailSendRequestEvent::class, $event);
         $this->assertSame(
             [
                 Language::ROMANIAN->value => $romanian,

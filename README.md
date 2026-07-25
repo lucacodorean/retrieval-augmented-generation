@@ -138,6 +138,37 @@ Exact vehicle filters are a future optional capability.
 `VehicleAgent` uses local `qwen3:8b` for generation. Ollama `nomic-embed-text` is
 used separately for embeddings.
 
+## Workflows
+
+Neuron workflows model multi-step operations as an event-driven graph. Each node
+performs one unit of work and emits an event that routes execution to another node or
+terminates a branch or the workflow.
+Workflow state retains data needed by later nodes, while a parallel event can run
+isolated branches concurrently and join their results before execution continues.
+
+`EmailQueryWorkflow` applies these concepts to multilingual vehicle-query emails. It
+stores the complete `VehicleAgent` response in workflow state, translates only its
+natural-language text in Romanian and French branches, collects both results, and sends
+one email per translation. Serialized vehicle records remain unchanged and are included
+with each email.
+
+```mermaid
+flowchart TD
+    Start([Workflow starts]) -->|workflow started| Query[Run query]
+    Query -->|query obtained| Delegate[Delegate translations]
+    Delegate -->|Romanian translation requested| Romanian[Translate to Romanian]
+    Delegate -->|French translation requested| French[Translate to French]
+    Romanian -->|Romanian translation completed| Join((Parallel join))
+    French -->|French translation completed| Join
+    Join -->|all translations completed| Collect[Collect translations]
+    Collect -->|email sending requested| Send[Send translated emails]
+    Send -->|workflow stopped| Stop([Workflow stops])
+```
+
+The translation nodes run concurrently through Neuron's asynchronous executor. The
+collector runs only after both branches complete and stores translations by language in
+the main workflow state.
+
 ## Add A New Entity
 
 To apply this pattern to a new entity such as `Fix`:
