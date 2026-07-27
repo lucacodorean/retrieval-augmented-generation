@@ -8,13 +8,11 @@ use App\Neuron\Agents\FrenchTranslationAgent;
 use App\Neuron\Agents\RomanianTranslationAgent;
 use NeuronAI\Chat\Messages\AssistantMessage;
 use NeuronAI\Chat\Messages\UserMessage;
-use NeuronAI\HttpClient\AmpHttpClient;
-use NeuronAI\Providers\Ollama\Ollama;
+use NeuronAI\Providers\OpenAI\OpenAI;
 use NeuronAI\Testing\FakeAIProvider;
 use NeuronAI\Testing\RequestRecord;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ReflectionMethod;
-use ReflectionProperty;
 use Tests\TestCase;
 use UnexpectedValueException;
 
@@ -91,19 +89,21 @@ class TranslationAgentTest extends TestCase
         $this->assertSourceMessage($provider->getRecorded()[1], 'Second source');
     }
 
-    public function test_the_production_provider_uses_the_amp_http_client(): void
+    public function test_the_production_provider_uses_the_configured_agent_provider(): void
     {
+        config()->set('agents', [
+            'provider' => 'openai',
+            'model' => 'gpt-4.1-mini',
+            'api_key' => 'test-key',
+        ]);
+
         $providerMethod = new ReflectionMethod(FrenchTranslationAgent::class, 'provider');
 
         $this->assertTrue($providerMethod->isProtected());
 
         $provider = $providerMethod->invoke(new FrenchTranslationAgent);
 
-        $this->assertInstanceOf(Ollama::class, $provider);
-        $this->assertInstanceOf(AmpHttpClient::class, $provider->getHttpClient());
-
-        $timeout = new ReflectionProperty(AmpHttpClient::class, 'timeout');
-        $this->assertSame(180.0, $timeout->getValue($provider->getHttpClient()));
+        $this->assertInstanceOf(OpenAI::class, $provider);
     }
 
     /** @return array<string, array{class-string, string, string}> */

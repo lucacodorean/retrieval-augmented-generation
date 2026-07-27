@@ -1,7 +1,5 @@
 <x-mail::message>
-<div>
-{!! nl2br(e($agentText)) !!}
-</div>
+{{ $agentText }}
 
 @if (count($vehicles) > 0)
 @php

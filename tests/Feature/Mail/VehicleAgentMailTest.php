@@ -15,7 +15,7 @@ class VehicleAgentMailTest extends TestCase
     public function test_it_renders_an_escaped_multiline_message_and_vehicle_details(): void
     {
         $mail = new VehicleAgentMail(
-            agentText: "First line\n<script>alert('x')</script>\n[Review results](https://attacker.example)",
+            agentText: "## Result summary\n\nFirst line with **important** details.\n\n- First finding\n- [Review results](https://example.test)\n\n<script>alert('x')</script>",
             language: 'French',
             vehicles: [[
                 'record' => [
@@ -44,13 +44,12 @@ class VehicleAgentMailTest extends TestCase
 
         $html = $mail->render();
 
+        $this->assertMatchesRegularExpression('/<h2[^>]*>\s*Result summary\s*<\/h2>/', $html);
+        $this->assertMatchesRegularExpression('/First line with\s*<strong[^>]*>important<\/strong>\s*details\./', $html);
+        $this->assertMatchesRegularExpression('/<li[^>]*>\s*First finding\s*<\/li>/', $html);
+        $this->assertStringContainsString('href="https://example.test"', $html);
         $this->assertStringContainsString('&lt;script&gt;alert', $html);
-        $this->assertStringContainsString('&lt;/script&gt;', $html);
         $this->assertStringNotContainsString('<script>', $html);
-        $this->assertMatchesRegularExpression('/First line<br\s*\/?>\s*&lt;script&gt;/', $html);
-        $this->assertStringContainsString('[Review results](https://attacker.example)', $html);
-        $this->assertStringNotContainsString('href="https://attacker.example"', $html);
-        $this->assertDoesNotMatchRegularExpression('/<a[^>]*>\s*Review results\s*<\/a>/', $html);
         $this->assertMatchesRegularExpression('/<h2[^>]*>\s*Vehicle details\s*<\/h2>/', $html);
 
         $this->assertMatchesRegularExpression(

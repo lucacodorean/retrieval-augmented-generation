@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Neuron\Agents;
 
+use App\Neuron\AgentProvider;
 use App\Neuron\Tools\VehicleSearchTool;
 use NeuronAI\Agent\Agent;
 use NeuronAI\Agent\SystemPrompt;
 use NeuronAI\Chat\Messages\ToolResultMessage;
 use NeuronAI\Chat\Messages\UserMessage;
-use NeuronAI\HttpClient\AmpHttpClient;
 use NeuronAI\Providers\AIProviderInterface;
-use NeuronAI\Providers\Ollama\Ollama;
 use NeuronAI\Tools\ToolInterface;
 
 class VehicleAgent extends Agent
@@ -63,11 +62,7 @@ class VehicleAgent extends Agent
 
     protected function provider(): AIProviderInterface
     {
-        return new Ollama(
-            config('rag.ollama.url'),
-            'qwen3:8b',
-            httpClient: new AmpHttpClient(timeout: config('rag.ollama.timeout')),
-        );
+        return AgentProvider::configuredProvider();
     }
 
     protected function instructions(): string

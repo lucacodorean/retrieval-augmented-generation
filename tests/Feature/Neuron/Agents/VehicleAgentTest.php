@@ -12,12 +12,10 @@ use App\Rag\RagRetriever;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use NeuronAI\Chat\Messages\AssistantMessage;
 use NeuronAI\Chat\Messages\ToolCallMessage;
-use NeuronAI\HttpClient\AmpHttpClient;
-use NeuronAI\Providers\Ollama\Ollama;
+use NeuronAI\Providers\OpenAI\OpenAI;
 use NeuronAI\RAG\Document;
 use NeuronAI\Testing\FakeAIProvider;
 use ReflectionMethod;
-use ReflectionProperty;
 use Tests\TestCase;
 
 class VehicleAgentTest extends TestCase
@@ -72,18 +70,20 @@ class VehicleAgentTest extends TestCase
         $provider->assertCallCount(1);
     }
 
-    public function test_the_production_provider_uses_the_configured_ollama_timeout(): void
+    public function test_the_production_provider_uses_the_configured_agent_provider(): void
     {
+        config()->set('agents', [
+            'provider' => 'openai',
+            'model' => 'gpt-4.1-mini',
+            'api_key' => 'test-key',
+        ]);
+
         $providerMethod = new ReflectionMethod(VehicleAgent::class, 'provider');
         $provider = $providerMethod->invoke(new VehicleAgent(
             new VehicleSearchTool(new VehicleAgentFakeRetriever([])),
         ));
 
-        $this->assertInstanceOf(Ollama::class, $provider);
-        $this->assertInstanceOf(AmpHttpClient::class, $provider->getHttpClient());
-
-        $timeout = new ReflectionProperty(AmpHttpClient::class, 'timeout');
-        $this->assertSame(180.0, $timeout->getValue($provider->getHttpClient()));
+        $this->assertInstanceOf(OpenAI::class, $provider);
     }
 
     private function document(int $vehicleId, float $score): Document

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Providers;
 
+use App\Neuron\AgentProvider;
 use App\Rag\QdrantDocumentStoreResolver;
+use NeuronAI\Providers\Ollama\Ollama;
 use NeuronAI\RAG\Embeddings\EmbeddingsProviderInterface;
 use NeuronAI\RAG\Embeddings\OllamaEmbeddingsProvider;
 use ReflectionProperty;
@@ -12,6 +14,17 @@ use Tests\TestCase;
 
 class AppServiceProviderTest extends TestCase
 {
+    public function test_agent_provider_is_not_container_bound_and_its_static_factory_remains_usable(): void
+    {
+        config()->set('agents.provider', 'ollama');
+        config()->set('agents.model', 'llama3.2');
+        config()->set('agents.base_url', 'http://ollama.test/api');
+        config()->set('agents.timeout', 12.5);
+
+        $this->assertFalse(app()->bound(AgentProvider::class));
+        $this->assertInstanceOf(Ollama::class, AgentProvider::configuredProvider());
+    }
+
     public function test_embeddings_provider_binding_resolves_ollama_with_configured_model_and_url(): void
     {
         config()->set('rag.ollama.model', 'test-embedding-model');
