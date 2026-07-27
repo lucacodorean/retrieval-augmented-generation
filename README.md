@@ -171,7 +171,7 @@ the main workflow state.
 
 ## Add A New Entity
 
-To apply this pattern to a new entity such as `Fix`:
+To apply this pattern to a new entity:
 
 1. Create the source model, migration, factory, and source-record tests.
 2. Create a document builder with readable content and scalar metadata.
